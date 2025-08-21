@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องมือสร้างกราฟ Scatter Plot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://html2canvas.herokuapp.com/dist/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .developer-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .developer-info p {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Sarabun', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .data-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .add-point-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Sarabun', sans-serif;
+        }
+        
+        .add-point-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .data-points {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+        }
+        
+        .data-point {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+        
+        .chart-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        
+        .knowledge-section {
+            background: #fefce8;
+            border: 2px solid #eab308;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .knowledge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .knowledge-header:hover {
+            background: rgba(234, 179, 8, 0.1);
+        }
+        
+        .knowledge-header h3 {
+            color: #a16207;
+            font-size: 1.4rem;
+            margin: 0;
+        }
+        
+        .toggle-btn {
+            background: #eab308;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: #ca8a04;
+            transform: scale(1.05);
+        }
+        
+        .knowledge-content {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .knowledge-content.show {
+            display: grid;
+        }
+        
+        .knowledge-card {
+            background: white;
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .knowledge-card h4 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .knowledge-card p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .knowledge-card ul {
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .knowledge-card li {
+            margin-bottom: 8px;
+        }
+        
+        .correlation-guide {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .guide-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .guide-item.positive {
+            background: #dcfce7;
+            border: 2px solid #16a34a;
+            color: #15803d;
+        }
+        
+        .guide-item.moderate {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            color: #d97706;
+        }
+        
+        .guide-item.weak {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #dc2626;
+        }
+        
+        .guide-item.none {
+            background: #f1f5f9;
+            border: 2px solid #64748b;
+            color: #475569;
+        }
+        
+        .formula {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .formula-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+        }
+        
+        .numerator {
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .denominator {
+            font-size: 0.9em;
+        }
+        
+        .formula-explanation {
+            text-align: left;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .formula-explanation p {
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .formula-explanation ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .formula-explanation li {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .summary-section {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-section h3 {
+            color: #0369a1;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .summary-text {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #bae6fd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Sarabun', sans-serif;
+            resize: vertical;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Sarabun', sans-serif;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4facfe;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+            }
+            
+            .action-buttons {
+                display: none;
+            }
+            
+            .knowledge-section {
+                display: none;
+            }
+            
+            .input-section {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="printArea">
+        <div class="header">
+            <h1>🔬 เครื่องมือสร้างกราฟ Scatter Plot</h1>
+            <p>วิเคราะห์ความสัมพันธ์ระหว่างตัวแปร X และ Y แบบ Interactive</p>
+            <div class="developer-info">
+                <p>👨‍💻 พัฒนาโดย: <strong>จิรัฎฐ์ สุดใจ</strong> | 📧 iam.geradt@gmail.com</p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label>🏷️ ชื่อกราฟ</label>
+                    <input type="text" id="chartTitle" placeholder="เช่น ความสัมพันธ์ระหว่างเวลาศึกษาและคะแนนสอบ" value="ความสัมพันธ์ระหว่าง X และ Y">
+                </div>
+                
+                <div class="input-group">
+                    <label>📊 ชื่อแกน X</label>
+                    <input type="text" id="xLabel" placeholder="เช่น เวลาศึกษา (ชั่วโมง)" value="ตัวแปร X">
+                </div>
+                
+                <div class="input-group">
+                    <label>📈 ชื่อแกน Y</label>
+                    <input type="text" id="yLabel" placeholder="เช่น คะแนนสอบ" value="ตัวแปร Y">
+                </div>
+                
+                <div class="input-group">
+                    <label>➕ เพิ่มข้อมูล</label>
+                    <div class="data-input">
+                        <input type="number" id="xValue" placeholder="ค่า X" step="0.1">
+                        <input type="number" id="yValue" placeholder="ค่า Y" step="0.1">
+                    </div>
+                    <button class="add-point-btn" onclick="addDataPoint()">เพิ่มจุดข้อมูล</button>
+                </div>
+                
+                <div class="input-group">
+                    <label>📋 ข้อมูลที่ป้อน</label>
+                    <div class="data-points" id="dataPoints">
+                        <div class="data-point">
+                            <span>X: 1, Y: 2</span>
+                            <button class="delete-btn" onclick="removeDataPoint(0)">ลบ</button>
+                        </div>
+                        <div class="data-point">
+                            <span>X: 2, Y: 4</span>
+                            <button class="delete-btn" onclick="removeDataPoint(1)">ลบ</button>
+                        </div>
+                        <div class="data-point">
+                            <span>X: 3, Y: 6</span>
+                            <button class="delete-btn" onclick="removeDataPoint(2)">ลบ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <div class="chart-container">
+                    <canvas id="scatterChart"></canvas>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="pointCount">3</div>
+                        <div class="stat-label">จำนวนจุดข้อมูล</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="correlation">1.00</div>
+                        <div class="stat-label">ค่าสหสัมพันธ์</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="trend">บวก</div>
+                        <div class="stat-label">แนวโน้ม</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="knowledge-section">
+            <div class="knowledge-header" onclick="toggleKnowledge()">
+                <h3>📚 ความรู้เกี่ยวกับ Scatter Plot และค่าสหสัมพันธ์</h3>
+                <button class="toggle-btn" id="toggleBtn">แสดงความรู้</button>
+            </div>
+            <div class="knowledge-content" id="knowledgeContent">
+                <div class="knowledge-card">
+                    <h4>📊 Scatter Plot คืออะไร?</h4>
+                    <p><strong>กราฟกระจาย (Scatter Plot)</strong> เป็นกราฟที่แสดงความสัมพันธ์ระหว่างตัวแปร 2 ตัว โดยใช้จุดในระบบพิกัด</p>
+                    <ul>
+                        <li><strong>ประโยชน์:</strong> ดูแนวโน้มและความสัมพันธ์ของข้อมูล</li>
+                        <li><strong>ใช้เมื่อ:</strong> ต้องการศึกษาว่าตัวแปรหนึ่งมีผลต่ออีกตัวแปรหนึ่งหรือไม่</li>
+                        <li><strong>ตัวอย่าง:</strong> ความสัมพันธ์ระหว่างเวลาศึกษากับคะแนนสอบ</li>
+                        <li><strong>ข้อดี:</strong> เห็นภาพรวมข้อมูลได้ชัดเจน สามารถหาค่าผิดปกติได้</li>
+                    </ul>
+                </div>
+                
+                <div class="knowledge-card">
+                    <h4>🔍 ค่าสหสัมพันธ์คืออะไร?</h4>
+                    <p><strong>ค่าสหสัมพันธ์ (Correlation Coefficient)</strong> หรือ <strong>r</strong> เป็นค่าที่บอกความแข็งแกร่งและทิศทางของความสัมพันธ์เชิงเส้นตรงระหว่างตัวแปร 2 ตัว</p>
+                    <ul>
+                        <li><strong>ช่วงค่า:</strong> -1 ≤ r ≤ 1</li>
+                        <li><strong>r = 1:</strong> ความสัมพันธ์เชิงบวกสมบูรณ์</li>
+                        <li><strong>r = 0:</strong> ไม่มีความสัมพันธ์เชิงเส้นตรง</li>
+                        <li><strong>r = -1:</strong> ความสัมพันธ์เชิงลบสมบูรณ์</li>
+                    </ul>
+                </div>
+                
+                <div class="knowledge-card">
+                    <h4>📊 การแปลความหมาย</h4>
+                    <div class="correlation-guide">
+                        <div class="guide-item positive">
+                            <span class="range">0.7 ≤ |r| ≤ 1.0</span>
+                            <span class="meaning">ความสัมพันธ์แข็งแกร่ง</span>
+                        </div>
+                        <div class="guide-item moderate">
+                            <span class="range">0.3 ≤ |r| < 0.7</span>
+                            <span class="meaning">ความสัมพันธ์ปานกลาง</span>
+                        </div>
+                        <div class="guide-item weak">
+                            <span class="range">0.0 < |r| < 0.3</span>
+                            <span class="meaning">ความสัมพันธ์อ่อน</span>
+                        </div>
+                        <div class="guide-item none">
+                            <span class="range">r = 0</span>
+                            <span class="meaning">ไม่มีความสัมพันธ์</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="knowledge-card">
+                    <h4>🧮 สูตรการคำนวณ (Pearson's r)</h4>
+                    <div class="formula">
+                        <div class="formula-text">
+                            r = <span class="fraction">
+                                <span class="numerator">n∑XY - ∑X∑Y</span>
+                                <span class="denominator">√[(n∑X² - (∑X)²)(n∑Y² - (∑Y)²)]</span>
+                            </span>
+                        </div>
+                        <div class="formula-explanation">
+                            <p><strong>โดยที่:</strong></p>
+                            <ul>
+                                <li><strong>n</strong> = จำนวนจุดข้อมูล</li>
+                                <li><strong>X, Y</strong> = ค่าของตัวแปร X และ Y</li>
+                                <li><strong>∑XY</strong> = ผลรวมของ X×Y</li>
+                                <li><strong>∑X, ∑Y</strong> = ผลรวมของ X และ Y</li>
+                                <li><strong>∑X², ∑Y²</strong> = ผลรวมของ X² และ Y²</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <h3>📝 สรุปผลการวิเคราะห์</h3>
+            <textarea class="summary-text" id="summaryText" placeholder="เขียนสรุปความสัมพันธ์ที่พบจากกราฟ เช่น แนวโน้มของข้อมูล ความแข็งแกร่งของความสัมพันธ์ และข้อสังเกตอื่นๆ..."></textarea>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="downloadChart()">💾 ดาวน์โหลดเป็นภาพ</button>
+            <button class="btn btn-secondary" onclick="printChart()">🖨️ พิมพ์กราฟ</button>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+        let dataPoints = [
+            {x: 1, y: 2},
+            {x: 2, y: 4},
+            {x: 3, y: 6}
+        ];
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'ข้อมูล',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(79, 172, 254, 0.8)',
+                        borderColor: 'rgba(79, 172, 254, 1)',
+                        borderWidth: 2,
+                        pointRadius: 8,
+                        pointHoverRadius: 12,
+                        pointBackgroundColor: 'rgba(79, 172, 254, 0.9)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: document.getElementById('chartTitle').value,
+                            font: {
+                                size: 18,
+                                weight: 'bold',
+                                family: 'Sarabun'
+                            },
+                            color: '#2d3748'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: document.getElementById('xLabel').value,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold',
+                                    family: 'Sarabun'
+                                },
+                                color: '#4a5568'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: document.getElementById('yLabel').value,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold',
+                                    family: 'Sarabun'
+                                },
+                                color: '#4a5568'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            updateStats();
+        }
+
+        // Add data point
+        function addDataPoint() {
+            const xValue = parseFloat(document.getElementById('xValue').value);
+            const yValue = parseFloat(document.getElementById('yValue').value);
+            
+            if (isNaN(xValue) || isNaN(yValue)) {
+                alert('กรุณาใส่ตัวเลขที่ถูกต้อง');
+                return;
+            }
+            
+            dataPoints.push({x: xValue, y: yValue});
+            updateChart();
+            updateDataPointsList();
+            updateStats();
+            
+            // Clear inputs
+            document.getElementById('xValue').value = '';
+            document.getElementById('yValue').value = '';
+        }
+
+        // Remove data point
+        function removeDataPoint(index) {
+            dataPoints.splice(index, 1);
+            updateChart();
+            updateDataPointsList();
+            updateStats();
+        }
+
+        // Update chart
+        function updateChart() {
+            chart.data.datasets[0].data = dataPoints;
+            chart.options.plugins.title.text = document.getElementById('chartTitle').value;
+            chart.options.scales.x.title.text = document.getElementById('xLabel').value;
+            chart.options.scales.y.title.text = document.getElementById('yLabel').value;
+            chart.update();
+        }
+
+        // Update data points list
+        function updateDataPointsList() {
+            const container = document.getElementById('dataPoints');
+            container.innerHTML = '';
+            
+            dataPoints.forEach((point, index) => {
+                const div = document.createElement('div');
+                div.className = 'data-point';
+                div.innerHTML = `
+                    <span>X: ${point.x}, Y: ${point.y}</span>
+                    <button class="delete-btn" onclick="removeDataPoint(${index})">ลบ</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Calculate correlation coefficient
+        function calculateCorrelation() {
+            if (dataPoints.length < 2) return 0;
+            
+            const n = dataPoints.length;
+            const sumX = dataPoints.reduce((sum, point) => sum + point.x, 0);
+            const sumY = dataPoints.reduce((sum, point) => sum + point.y, 0);
+            const sumXY = dataPoints.reduce((sum, point) => sum + point.x * point.y, 0);
+            const sumX2 = dataPoints.reduce((sum, point) => sum + point.x * point.x, 0);
+            const sumY2 = dataPoints.reduce((sum, point) => sum + point.y * point.y, 0);
+            
+            const numerator = n * sumXY - sumX * sumY;
+            const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            
+            return denominator === 0 ? 0 : numerator / denominator;
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('pointCount').textContent = dataPoints.length;
+            
+            const correlation = calculateCorrelation();
+            document.getElementById('correlation').textContent = correlation.toFixed(2);
+            
+            let trend = 'ไม่มี';
+            if (correlation > 0.7) trend = 'บวกแข็งแกร่ง';
+            else if (correlation > 0.3) trend = 'บวกปานกลาง';
+            else if (correlation > 0) trend = 'บวกอ่อน';
+            else if (correlation < -0.7) trend = 'ลบแข็งแกร่ง';
+            else if (correlation < -0.3) trend = 'ลบปานกลาง';
+            else if (correlation < 0) trend = 'ลบอ่อน';
+            
+            document.getElementById('trend').textContent = trend;
+            
+            // Auto-update URL
+            updateURL();
+        }
+
+        // Download chart as image
+        function downloadChart() {
+            html2canvas(document.getElementById('printArea'), {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'scatter-plot-analysis.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Print chart
+        function printChart() {
+            window.print();
+        }
+
+        // Event listeners for real-time updates
+        document.getElementById('chartTitle').addEventListener('input', function() {
+            updateChart();
+            updateURL();
+        });
+        document.getElementById('xLabel').addEventListener('input', function() {
+            updateChart();
+            updateURL();
+        });
+        document.getElementById('yLabel').addEventListener('input', function() {
+            updateChart();
+            updateURL();
+        });
+        document.getElementById('summaryText').addEventListener('input', updateURL);
+
+        // Allow Enter key to add data point
+        document.getElementById('xValue').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('yValue').focus();
+            }
+        });
+
+        document.getElementById('yValue').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addDataPoint();
+            }
+        });
+
+        // Toggle knowledge section
+        function toggleKnowledge() {
+            const content = document.getElementById('knowledgeContent');
+            const btn = document.getElementById('toggleBtn');
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                btn.textContent = 'แสดงความรู้';
+            } else {
+                content.classList.add('show');
+                btn.textContent = 'ซ่อนความรู้';
+            }
+        }
+
+        // Load data from URL parameters
+        function loadDataFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const data = urlParams.get('data');
+            
+            if (data) {
+                try {
+                    const decodedData = JSON.parse(atob(data));
+                    
+                    // Load chart data
+                    if (decodedData.title) {
+                        document.getElementById('chartTitle').value = decodedData.title;
+                    }
+                    if (decodedData.xLabel) {
+                        document.getElementById('xLabel').value = decodedData.xLabel;
+                    }
+                    if (decodedData.yLabel) {
+                        document.getElementById('yLabel').value = decodedData.yLabel;
+                    }
+                    if (decodedData.summary) {
+                        document.getElementById('summaryText').value = decodedData.summary;
+                    }
+                    if (decodedData.dataPoints && Array.isArray(decodedData.dataPoints)) {
+                        dataPoints = decodedData.dataPoints;
+                    }
+                    
+                    // Update UI
+                    updateDataPointsList();
+                    updateStats();
+                    
+                } catch (error) {
+                    console.error('Error loading data from URL:', error);
+                }
+            }
+        }
+
+        // Auto-update URL with current data
+        function updateURL() {
+            const data = {
+                title: document.getElementById('chartTitle').value,
+                xLabel: document.getElementById('xLabel').value,
+                yLabel: document.getElementById('yLabel').value,
+                summary: document.getElementById('summaryText').value,
+                dataPoints: dataPoints
+            };
+            
+            const encodedData = btoa(JSON.stringify(data));
+            const newUrl = window.location.origin + window.location.pathname + '?data=' + encodedData;
+            
+            // Update URL without reloading the page
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        // Initialize the chart when page loads
+        window.addEventListener('load', function() {
+            loadDataFromURL();
+            initChart();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9728638074343da7',t:'MTc1NTc2MTA0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
