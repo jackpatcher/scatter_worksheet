@@ -70,29 +70,29 @@
         
         .input-section {
             background: #f8fafc;
-            border-radius: 15px;
-            padding: 25px;
-            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 12px;
+            border: 1px solid #e2e8f0;
         }
         
         .input-group {
-            margin-bottom: 25px;
+            margin-bottom: 12px;
         }
         
         .input-group label {
             display: block;
             font-weight: 600;
             color: #2d3748;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
+            margin-bottom: 4px;
+            font-size: 1rem;
         }
         
         .input-group input, .input-group textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            font-size: 0.97rem;
             font-family: 'Sarabun', sans-serif;
             transition: all 0.3s ease;
         }
@@ -441,6 +441,30 @@
             margin-top: 5px;
         }
         
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            min-width: 220px;
+            background: #059669;
+            color: #fff;
+            padding: 16px 28px;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(-20px);
+        }
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        
         @media print {
             body {
                 background: white;
@@ -484,20 +508,34 @@
 <body>
     <div class="container" id="printArea">
         <div class="header">
-            <h1>🔬 เครื่องมือสร้างกราฟ Scatter Plot</h1>
+            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 18px;">
+                <img id="logoImg" src="" alt="Logo" style="height: 6rem;   border-radius: 8px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); object-fit: cover;" />
+                <h1 style="margin: 0;">🔬 เครื่องมือสร้างกราฟ Scatter Plot วิทยาการข้อมูล</h1>
+            </div>
             <p>วิเคราะห์ความสัมพันธ์ระหว่างตัวแปร X และ Y แบบ Interactive</p>
             <div class="developer-info">
                 <p>👨‍💻 พัฒนาโดย: <strong>จิรัฎฐ์ สุดใจ</strong> | 📧 iam.geradt@gmail.com</p>
             </div>
         </div>
         
-        <div class="main-content">
+        <!-- Tab Control -->
+<div id="tabControl" style="display:flex;gap:8px;justify-content:center;margin:24px 0 12px 0;">
+    <button class="tab-btn" data-tab="graph" style="padding:10px 28px;border-radius:8px;border:none;background:#059669;color:#fff;font-size:1.08rem;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">สร้างกราฟ</button>
+    <button class="tab-btn" data-tab="knowledge" style="padding:10px 28px;border-radius:8px;border:none;background:#eab308;color:#fff;font-size:1.08rem;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">ใบความรู้</button>
+    <button class="tab-btn" data-tab="settings" style="padding:10px 28px;border-radius:8px;border:none;background:#4facfe;color:#fff;font-size:1.08rem;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">ตั้งค่า</button>
+</div>
+<!-- Tab Content -->
+<div id="tab-graph">
+    <div class="main-content">
             <div class="input-section">
+                <div class="input-group">
+                    <label>👥 กลุ่มที่</label>
+                    <input type="text" id="groupNumber" placeholder="เช่น 4/2">
+                </div>
                 <div class="input-group">
                     <label>🏷️ ชื่อกราฟ</label>
                     <input type="text" id="chartTitle" placeholder="เช่น ความสัมพันธ์ระหว่างเวลาศึกษาและคะแนนสอบ" value="ความสัมพันธ์ระหว่าง X และ Y">
                 </div>
-                
                 <div class="input-group">
                     <label>📊 ชื่อแกน X</label>
                     <input type="text" id="xLabel" placeholder="เช่น เวลาศึกษา (ชั่วโมง)" value="ตัวแปร X">
@@ -534,6 +572,15 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="input-group">
+                    <label>🎨 สีธีมพื้นหลัง</label>
+                    <input type="color" id="themeColor" value="#667eea">
+                </div>
+                <div class="input-group">
+                    <label>🟢 สีจุด Scatter</label>
+                    <input type="color" id="scatterColor" value="#4facfe">
+                </div>
             </div>
             
             <div class="chart-section">
@@ -555,10 +602,30 @@
                         <div class="stat-label">แนวโน้ม</div>
                     </div>
                 </div>
+                <div class="note-section" style="margin-top: 30px;">
+                    <label for="noteText" style="font-weight:600; color:#0369a1; display:block; margin-bottom:8px;">📝 โน้ต</label>
+                    <textarea id="noteText" class="summary-text" style="min-height: 100px;" placeholder="เขียนโน้ตเพิ่มเติม เช่น ข้อสังเกตหรือข้อมูลอื่นๆ..."></textarea>
+                </div>
             </div>
         </div>
         
-        <div class="knowledge-section">
+        
+
+        <div class="summary-section">
+            <h3>📝 สรุปผลการวิเคราะห์</h3>
+            <textarea class="summary-text" id="summaryText" placeholder="เขียนสรุปความสัมพันธ์ที่พบจากกราฟ เช่น แนวโน้มของข้อมูล ความแข็งแกร่งของความสัมพันธ์ และข้อสังเกตอื่นๆ..."></textarea>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="printChart()">🖨️ พิมพ์กราฟ</button>
+            <button class="btn btn-primary" onclick="copyLink()">🔗 คัดลอกลิงค์</button>
+        </div>
+</div>
+<div id="tab-knowledge" style="display:none;">
+    <div class="knowledge-section">
+            <div class="theme-color-controls" style="display: flex; gap: 18px; align-items: center; margin-bottom: 18px; justify-content: flex-end;">
+                
+            </div>
             <div class="knowledge-header" onclick="toggleKnowledge()">
                 <h3>📚 ความรู้เกี่ยวกับ Scatter Plot และค่าสหสัมพันธ์</h3>
                 <button class="toggle-btn" id="toggleBtn">แสดงความรู้</button>
@@ -631,25 +698,150 @@
                 </div>
             </div>
         </div>
-
-        <div class="summary-section">
-            <h3>📝 สรุปผลการวิเคราะห์</h3>
-            <textarea class="summary-text" id="summaryText" placeholder="เขียนสรุปความสัมพันธ์ที่พบจากกราฟ เช่น แนวโน้มของข้อมูล ความแข็งแกร่งของความสัมพันธ์ และข้อสังเกตอื่นๆ..."></textarea>
+</div>
+<div id="tab-settings" style="display:none;max-width:600px;margin:0 auto;">
+    <div style="display:flex;flex-direction:column;gap:18px;margin-top:18px;">
+        <div style="display:flex;align-items:center;gap:18px;">
+            <label style="font-weight:600;">โลโก้ URL</label>
+            <input type="text" id="logoUrlInput" style="flex:1;padding:8px 12px;border-radius:7px;border:1px solid #e2e8f0;">
         </div>
-        
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="downloadChart()">💾 ดาวน์โหลดเป็นภาพ</button>
-            <button class="btn btn-secondary" onclick="printChart()">🖨️ พิมพ์กราฟ</button>
+        <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <input type="color" id="bgColor1" style="width:32px;height:32px;border-radius:50%;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
+                <span style="font-size:0.85rem;">พื้นหลัง1</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <input type="color" id="bgColor2" style="width:32px;height:32px;border-radius:50%;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
+                <span style="font-size:0.85rem;">พื้นหลัง2</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <input type="color" id="heroTextColor" style="width:32px;height:32px;border-radius:50%;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
+                <span style="font-size:0.85rem;">ตัวอักษร</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <input type="color" id="heroBgColor" style="width:32px;height:32px;border-radius:50%;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
+                <span style="font-size:0.85rem;">พื้นหลัง hero</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <input type="color" id="scatterColor" style="width:32px;height:32px;border-radius:50%;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
+                <span style="font-size:0.85rem;">จุด scatter</span>
+            </div>
         </div>
     </div>
+</div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
 
     <script>
+        // โลโก้ url สามารถเปลี่ยนค่าได้ที่นี่
+        let logoUrl = "https://smv.ac.th/site/wp-content/uploads/2017/11/cropped-smv_logo_gold_100.png"; // ตัวอย่างโลโก้
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('logoImg').src = logoUrl;
+        });
+        function showToast(message, success=true) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = success ? '#059669' : '#ef4444';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2200);
+        }
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    showToast('คัดลอกลิงค์เรียบร้อยแล้ว!');
+                })
+                .catch(() => {
+                    showToast('ไม่สามารถคัดลอกลิงค์ได้', false);
+                });
+        }
         let chart;
         let dataPoints = [
             {x: 1, y: 2},
             {x: 2, y: 4},
             {x: 3, y: 6}
         ];
+        // Main data object
+        let data = {
+            title: '',
+            xLabel: '',
+            yLabel: '',
+            summary: '',
+            groupNumber: '',
+            note: '',
+            themeColor: '#667eea',
+            bgColor1: '#667eea',
+            bgColor2: '#764ba2',
+            heroTextColor: '#ffffff',
+            heroBgColor: '#4facfe',
+            scatterColor: '#4facfe',
+            dataPoints: dataPoints
+        };
+
+        // Base64 encode/decode Unicode safe
+        function encodeBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        function decodeBase64(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
+        // Sync data to URL
+        function syncDataToUrl() {
+            data.title = document.getElementById('chartTitle').value;
+            data.xLabel = document.getElementById('xLabel').value;
+            data.yLabel = document.getElementById('yLabel').value;
+            data.summary = document.getElementById('summaryText').value;
+            data.groupNumber = document.getElementById('groupNumber').value;
+            data.note = document.getElementById('noteText').value;
+            data.themeColor = document.getElementById('themeColor').value;
+            data.bgColor1 = document.getElementById('bgColor1').value;
+            data.bgColor2 = document.getElementById('bgColor2').value;
+            data.heroTextColor = document.getElementById('heroTextColor').value;
+            data.heroBgColor = document.getElementById('heroBgColor').value;
+            data.scatterColor = document.getElementById('scatterColor').value;
+            data.dataPoints = dataPoints;
+            const jsonStr = JSON.stringify(data);
+            const base64 = encodeBase64(jsonStr);
+            const url = new URL(window.location.href);
+            url.searchParams.set('data', base64);
+            history.replaceState(null, '', url.toString());
+        }
+
+        // Load data from URL if present
+        function loadDataFromUrl() {
+            const url = new URL(window.location.href);
+            const base64 = url.searchParams.get('data');
+            if (base64) {
+                try {
+                    const jsonStr = decodeBase64(base64);
+                    const newData = JSON.parse(jsonStr);
+                    data = newData;
+                    // Load chart data
+                    if (data.title) document.getElementById('chartTitle').value = data.title;
+                    if (data.xLabel) document.getElementById('xLabel').value = data.xLabel;
+                    if (data.yLabel) document.getElementById('yLabel').value = data.yLabel;
+                    if (data.summary) document.getElementById('summaryText').value = data.summary;
+                    if (data.groupNumber) document.getElementById('groupNumber').value = data.groupNumber;
+                    if (data.note) document.getElementById('noteText').value = data.note;
+                    if (data.themeColor) document.getElementById('themeColor').value = data.themeColor;
+                    if (data.bgColor1) document.getElementById('bgColor1').value = data.bgColor1;
+                    if (data.bgColor2) document.getElementById('bgColor2').value = data.bgColor2;
+                    if (data.heroTextColor) document.getElementById('heroTextColor').value = data.heroTextColor;
+                    if (data.heroBgColor) document.getElementById('heroBgColor').value = data.heroBgColor;
+                    if (data.scatterColor) document.getElementById('scatterColor').value = data.scatterColor;
+                    if (data.dataPoints && Array.isArray(data.dataPoints)) {
+                        dataPoints = data.dataPoints;
+                    }
+                    updateThemeColors();
+                    updateScatterColor();
+                } catch (e) {
+                    // ignore if invalid
+                }
+            }
+        }
 
         // Initialize chart
         function initChart() {
@@ -745,7 +937,7 @@
             updateChart();
             updateDataPointsList();
             updateStats();
-            
+            syncDataToUrl();
             // Clear inputs
             document.getElementById('xValue').value = '';
             document.getElementById('yValue').value = '';
@@ -757,6 +949,7 @@
             updateChart();
             updateDataPointsList();
             updateStats();
+            syncDataToUrl();
         }
 
         // Update chart
@@ -784,6 +977,29 @@
             });
         }
 
+        // อัปเดตสีธีม
+        function updateThemeColors() {
+            document.body.style.background = `linear-gradient(135deg, ${data.bgColor1} 0%, ${data.bgColor2} 100%)`;
+            document.querySelector('.header').style.background = data.heroBgColor;
+            document.querySelector('.header h1').style.color = data.heroTextColor;
+        }
+        // อัปเดตสีจุด scatter
+        function updateScatterColor() {
+            if (chart && chart.data && chart.data.datasets[0]) {
+                chart.data.datasets[0].backgroundColor = hexToRgba(data.scatterColor, 0.8);
+                chart.data.datasets[0].borderColor = hexToRgba(data.scatterColor, 1);
+                chart.data.datasets[0].pointBackgroundColor = hexToRgba(data.scatterColor, 0.9);
+                chart.update();
+            }
+        }
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#', '');
+            let r = parseInt(hex.substring(0,2), 16);
+            let g = parseInt(hex.substring(2,4), 16);
+            let b = parseInt(hex.substring(4,6), 16);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
         // Calculate correlation coefficient
         function calculateCorrelation() {
             if (dataPoints.length < 2) return 0;
@@ -804,10 +1020,8 @@
         // Update statistics
         function updateStats() {
             document.getElementById('pointCount').textContent = dataPoints.length;
-            
             const correlation = calculateCorrelation();
             document.getElementById('correlation').textContent = correlation.toFixed(2);
-            
             let trend = 'ไม่มี';
             if (correlation > 0.7) trend = 'บวกแข็งแกร่ง';
             else if (correlation > 0.3) trend = 'บวกปานกลาง';
@@ -815,11 +1029,8 @@
             else if (correlation < -0.7) trend = 'ลบแข็งแกร่ง';
             else if (correlation < -0.3) trend = 'ลบปานกลาง';
             else if (correlation < 0) trend = 'ลบอ่อน';
-            
             document.getElementById('trend').textContent = trend;
-            
-            // Auto-update URL
-            updateURL();
+            syncDataToUrl();
         }
 
         // Download chart as image
@@ -845,18 +1056,50 @@
         // Event listeners for real-time updates
         document.getElementById('chartTitle').addEventListener('input', function() {
             updateChart();
-            updateURL();
+            syncDataToUrl();
         });
         document.getElementById('xLabel').addEventListener('input', function() {
             updateChart();
-            updateURL();
+            syncDataToUrl();
         });
         document.getElementById('yLabel').addEventListener('input', function() {
             updateChart();
-            updateURL();
+            syncDataToUrl();
         });
         document.getElementById('summaryText').addEventListener('input', updateURL);
-
+    document.getElementById('summaryText').addEventListener('input', syncDataToUrl);
+    document.getElementById('groupNumber').addEventListener('input', syncDataToUrl);
+    document.getElementById('noteText').addEventListener('input', syncDataToUrl);
+    document.getElementById('themeColor').addEventListener('input', function() {
+    data.themeColor = this.value;
+    updateThemeColor();
+    syncDataToUrl();
+});
+document.getElementById('scatterColor').addEventListener('input', function() {
+    data.scatterColor = this.value;
+    updateScatterColor();
+    syncDataToUrl();
+});
+document.getElementById('bgColor1').addEventListener('input', function() {
+    data.bgColor1 = this.value;
+    updateThemeColors();
+    syncDataToUrl();
+});
+document.getElementById('bgColor2').addEventListener('input', function() {
+    data.bgColor2 = this.value;
+    updateThemeColors();
+    syncDataToUrl();
+});
+document.getElementById('heroTextColor').addEventListener('input', function() {
+    data.heroTextColor = this.value;
+    updateThemeColors();
+    syncDataToUrl();
+});
+document.getElementById('heroBgColor').addEventListener('input', function() {
+    data.heroBgColor = this.value;
+    updateThemeColors();
+    syncDataToUrl();
+});
         // Allow Enter key to add data point
         document.getElementById('xValue').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -929,19 +1172,38 @@
                 summary: document.getElementById('summaryText').value,
                 dataPoints: dataPoints
             };
-            
             const encodedData = btoa(JSON.stringify(data));
-            const newUrl = window.location.origin + window.location.pathname + '?data=' + encodedData;
-            
-            // Update URL without reloading the page
-            window.history.replaceState({}, '', newUrl);
+            // Force update URL with ?data=... (will reload page)
+            window.location.search = '?data=' + encodedData;
         }
 
         // Initialize the chart when page loads
         window.addEventListener('load', function() {
-            loadDataFromURL();
+            loadDataFromUrl();
             initChart();
         });
+        
+        // Tab control logic
+const tabBtns = document.querySelectorAll('.tab-btn');
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        tabBtns.forEach(b => b.style.opacity = '0.7');
+        this.style.opacity = '1';
+        document.getElementById('tab-graph').style.display = 'none';
+        document.getElementById('tab-knowledge').style.display = 'none';
+        document.getElementById('tab-settings').style.display = 'none';
+        document.getElementById('tab-' + this.dataset.tab).style.display = '';
+    });
+});
+tabBtns[0].style.opacity = '1'; // default active
+// โลโก้ url sync
+const logoUrlInput = document.getElementById('logoUrlInput');
+logoUrlInput.value = logoUrl;
+logoUrlInput.addEventListener('input', function() {
+    logoUrl = this.value;
+    document.getElementById('logoImg').src = logoUrl;
+    syncDataToUrl();
+});
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9728638074343da7',t:'MTc1NTc2MTA0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
